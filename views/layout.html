@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{% block title %}Messages{% endblock %}</title>
+  {% block css %}{% endblock %}
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0,user-scalable=no">
+  <meta name="format-detection" content="telephone=no">
+  <script>
+      ;(function(){
+      var win = window, docElem = document.documentElement, timeoutId;setRem();docElem.setAttribute('data-dpr', win.devicePixelRatio);win.addEventListener('resize', delaySetRem, false);win.addEventListener('pageshow', function(e){e.persisted && delaySetRem();}, false);function delaySetRem(){clearTimeout(timeoutId);timeoutId = setTimeout(setRem, 300);}function setRem(){win.rem = docElem.getBoundingClientRect().width / 10;docElem.style.fontSize = win.rem + 'px';}})();
+  </script>
+</head>
+<body>
+
+    {% block content %}
+      <p>Forgot to add content?</p>
+    {% endblock %}
+
+    {% block js %}
+      <!-- <script type="text/javascript"></script> -->
+    {% endblock %}
+
+</body>
+</html>

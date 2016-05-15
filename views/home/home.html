@@ -1,0 +1,21 @@
+{% extends '../layout.html' %}
+{% block css %}<link rel="stylesheet" type="text/css" href="/styles/mainbackup.css">{% endblock %}
+{% block title %}Musixise Stage{% endblock %}
+
+{% block content %}
+<div class="body">
+	<input class="stage-entrance"></input>
+</div>
+{% endblock %}
+
+{% block js %}
+	<script src="/scripts/jquery.js"></script>
+	<script>
+	  	//main page:
+	  	$('.stage-entrance').keydown(function(e){
+	    	if (e.keyCode == 13 && $(this).val()) {
+	      	location.href = '//'+location.host + '/stage/'+ $(this).val();
+	    	}
+	  	});
+	</script>
+{% endblock %}

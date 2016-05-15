@@ -1,0 +1,79 @@
+{% extends '../layout.html' %}
+{% block css %}<link rel="stylesheet" type="text/css" href="/styles/stagelist.css">{% endblock %}
+{% block title %}Musixise StageList{% endblock %}
+
+{% block content %}
+	<!-- <div id="bg"><img src="http://m.musixise.com/images/radiohead_sprite_t.png" id="bgi" /></div> -->
+	<div class="main">
+		<div id="master-section">
+			<div class="master" data-id="fzw">
+				<img class="avatar" src="">
+				<div class="bar">
+					<p class="name">fzw</p>
+				</div>
+			</div>
+			<div class="master" data-id="fzw">
+				<img class="avatar" src="">
+				<div class="bar">
+					<p class="name">fzw</p>
+				</div>
+			</div>
+		</div>
+		
+		<div id="musixiser-section">
+			<div class="musixiser" data-id="fzw">
+				<img class="avatar" src="">
+				<div class="bar">
+					<p class="name">fzw</p>
+				</div>
+			</div>
+		
+			<div class="musixiser" data-id="fzw">
+				<img class="avatar" src="">
+				<div class="bar">
+					<p class="name">fzw</p>
+				</div>
+			</div>
+			<div class="musixiser" data-id="fzw">
+				<img class="avatar" src="">
+				<div class="bar">
+					<p class="name">fzw</p>
+				</div>
+			</div>
+		
+			<div class="musixiser" data-id="fzw">
+				<img class="avatar" src="">
+				<div class="bar">
+					<p class="name">fzw</p>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+
+{% block js %}
+	<script src="/scripts/jquery.js"></script>
+	<script src="/scripts/stagelist.js"></script>
+
+<!-- original radiohead script to laod sprite
+	<script>
+		var s=false;
+		function r() {
+		$('#bgi').width( $(window).width()*21 );
+		$('#bgi').height( $(window).height()*21 ); 
+		}
+		$('#bgi').load(function() {
+			$('#bgi').css('visibility', 'visible');
+			r();
+			var f = 0;
+			setInterval(function(){
+				$('#bg').css('left', '-'+((f%21)*$(window).width())+'px');
+				$('#bg').css('top', '-'+((Math.floor(f/21))*$(window).height())+'px');		
+				f = f + 1;
+				if (f==410) f=0;
+			},120);
+			});
+		$(window).resize(function(){r();});
+	</script> -->
+{% endblock %}
