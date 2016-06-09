@@ -85,6 +85,11 @@
 	var socket = io('http://io.musixise.com');
 	var Visual = __webpack_require__(4);
 	var Sound = __webpack_require__(5);
+	var Comment = __webpack_require__(6);
+	
+	var mainTpl = __webpack_require__(7);
+	
+	var mock = __webpack_require__(10);
 	
 	var musixiser = '';
 	musixiser = location.href.match(/.*?stage\/(.*)/)[1];
@@ -95,19 +100,44 @@
 	var app = {
 	    init: function() {
 	        var self = this;
+	        self.render();
 	        Visual.bindResponsiveBackgroundSprite();
+	        Comment.init(function(msg,order_songname){
+	            console.log('mlb');
+	            socket.emit('req_AudienceComment',msg);
+	            if (order_songname) {alert('sd');socket.emit('req_AudienceOrderSong',order_songname);}
+	        });
 	    	self.bindSocket();
+	        self.bindLeaveMessage();
+	        self.bindSendGift();
+	    },
+	    render: function() {
+	        var self = this;
+	        $('body').append(mainTpl(mock));
+	
 	    },
 	    bindSocket: function() {
 	        console.log('In SoundModule: bindSocket');
 	        socket.on('connect', function() {
 	            console.log('enter stage ' + musixiser);
-	            socket.emit('enter stage', musixiser);
+	            socket.emit('audienceEnterStage', musixiser);
 	        });
-	        socket.on('tocmsg', function(data) {
+	        socket.on('res_MusixiserMIDI', function(data) {
 	            var note_data = JSON.parse(data.message);
 	            Sound.sendMidi(note_data);
-	            Visual.letThereBeLight(note_data);
+	            // Visual.letThereBeLight(note_data);
+	        });
+	        socket.on('res_MusixiserComment',function(data){
+	            console.log('主播发来一条消息:'+data);
+	        });
+	        socket.on('res_MusixiserPickSong',function(data){
+	            console.log('主播将开始演奏'+data);
+	        });
+	        socket.on('res_AudienceComment', function(data) {
+	            $('#tl-msg ul').prepend('<li>'+data+'</li>');
+	        });
+	        socket.on('res_AudienceOrderSong', function(data) {
+	            console.log('有观众点了歌:'+data);
 	        });
 	        socket.on('no stage', function() {
 	            $('.stage-banner').html('舞台并不存在,3s后返回');
@@ -121,6 +151,13 @@
 	                }
 	            }, 1000);
 	        });
+	
+	    },
+	    bindLeaveMessage: function(){
+	
+	    },
+	    bindSendGift: function(){
+	
 	    }
 	};
 	module.exports = app;
@@ -139,98 +176,416 @@
 /* 4 */
 /***/ function(module, exports) {
 
+	// var $ = require('../../_common/js/zepto.min.js');
+	var $window = $(window);
+	var the_light = '#ffff00';
+	var VisualModule = {
+	    bindResponsiveBackgroundSprite: function() {
 	
-	    // var $ = require('../../_common/js/zepto.min.js');
-	    var $window = $(window);
-	    var the_light = '#ffff00';
-	    var VisualModule = {
-	        bindResponsiveBackgroundSprite: function() {
-	            
-	            var s = false;
+	        var s = false;
 	
-	            function generateLight() {
-	                setInterval(function() {
-	                    var a = '' + (parseInt(Math.random() * 255));
-	                    var b = '' + (parseInt(Math.random() * 255));
-	                    var c = '' + (parseInt(Math.random() * 255));
-	                    var dice = parseInt(Math.random() * 3);
-	                    the_light = 'rgb(' + a + ',' + b + ',' + c + ')';
-	                }, 10000);
-	            }
-	            generateLight();
-	
-	            // background sprite animation
-	            function r() {
-	                $('#bgi').width($(window).width() * 21);
-	                $('#bgi').height($(window).height() * 21);
-	            }
-	            // $('#bgi').load(function() {
-	            $('#bgi').css('visibility', 'visible');
-	            r();
-	            var f = 0;
+	        function generateLight() {
 	            setInterval(function() {
-	                $('#bg').css('left', '-' + ((f % 21) * $(window).width()) + 'px');
-	                $('#bg').css('top', '-' + ((Math.floor(f / 21)) * $(window).height()) + 'px');
-	                f = f + 1;
-	                if (f == 410) f = 0;
-	            }, 120);
-	            // });
-	
-	            $(window).resize(function() { r(); });
-	        },
-	        letThereBeLight: function(note_data) {
-	            if (note_data.midi_msg[0] == 144) {
-	                $('body').css({ backgroundColor: the_light });
-	                console.log('hehe')
-	                // $('body').stop().animate({ backgroundColor: "#000" }, 400);
-	            }
+	                var a = '' + (parseInt(Math.random() * 255));
+	                var b = '' + (parseInt(Math.random() * 255));
+	                var c = '' + (parseInt(Math.random() * 255));
+	                var dice = parseInt(Math.random() * 3);
+	                the_light = 'rgb(' + a + ',' + b + ',' + c + ')';
+	            }, 10000);
 	        }
-	    }
+	        generateLight();
 	
-	    console.log('VisualModule Activated');
-	    module.exports = VisualModule;
-
+	        // background sprite animation
+	        function r() {
+	            $('#bgi').width($(window).width() * 21);
+	            $('#bgi').height($(window).height() * 21);
+	        }
+	        // $('#bgi').load(function() {
+	        $('#bgi').css('visibility', 'visible');
+	        r();
+	        var f = 0;
+	        setInterval(function() {
+	            $('#bg').css('left', '-' + ((f % 21) * $(window).width()) + 'px');
+	            $('#bg').css('top', '-' + ((Math.floor(f / 21)) * $(window).height()) + 'px');
+	            f = f + 1;
+	            if (f == 410) f = 0;
+	        }, 120);
+	        // });
+	
+	        $(window).resize(function() { r(); });
+	    },
+	    letThereBeLight: function(note_data) {
+	        if (note_data.midi_msg[0] == 144) {
+	            $('body').css({ backgroundColor: the_light });
+	        } else {
+	            $('body').css({ backgroundColor: '#000' });
+	        }
+	        // $('body').stop().animate({ backgroundColor: "#000" }, 400);
+	    }
+	}
+	
+	
+	console.log('VisualModule Activated');
+	module.exports = VisualModule;
 
 /***/ },
 /* 5 */
 /***/ function(module, exports) {
 
+	// jsbridge
+	var MUSIXISE = undefined;
 	
-		// var $ = require('../../_common/js/zepto.min.js');
+	function connectWebViewJavascriptBridge(callback) {
+	    if (window.WebViewJavascriptBridge) {
+	        callback(WebViewJavascriptBridge);
+	    } else {
+	        document.addEventListener('WebViewJavascriptBridgeReady', function() {
+	            callback(WebViewJavascriptBridge);
+	        }, false)
+	    }
+	}
 	
+	// 调用处理
+	function callHandler(evt, data, callback) {
+	    if (!MUSIXISE) {
+	        connectWebViewJavascriptBridge(function(bridge) {
+	            MUSIXISE = bridge;
+	            bridge.callHandler(evt, data, callback)
+	        })
+	    } else {
+	        MUSIXISE.callHandler(evt, data, callback)
+	    }
+	}
+	// timing params
+	var timeDiff = 0; //performer start time vs. audience enter 
+	var latency = 5000; //5000 milliseconds
+	var tt = 0; // total time, from the first two params
+	var hasFirstNoteArrived = false; //use first Note to set late 
 	
-		var hisname = location.href.match(/.*?stage\/(.*)/)[1];
+	var SoundModule = {
+	    sendMidi: function(note_data) {
+	        if (!hasFirstNoteArrived && note_data.midi_msg) {
+	            hasFirstNoteArrived = true;
+	            timeDiff = note_data.time - performance.now(); //rough value
+	        }
+	        tt = note_data.time - timeDiff + latency;
+	        
+	        //method 1: js setTimeout
+	        setTimeout(function() {
+	            callHandler('MusicDeviceMIDIEvent', [+note_data.midi_msg[0], +note_data.midi_msg[1], +note_data.midi_msg[2], 0])
+	        		console.log('bang');
+	        }, tt - performance.now());
+	        //mathod 2: native sample based
+					callHandler('MusicDeviceMIDIEvent', [+note_data.midi_msg[0], +note_data.midi_msg[1], +note_data.midi_msg[2], 44.1*(tt - performance.now())]);
+	    }
+	}
 	
-		// timing params
-		var timeDiff = 0; //performer start time vs. audience enter 
-		var latency = 1500; //5000 milliseconds
-		var tt = 0; // total time, from the first two params
-		var hasFirstNoteArrived = false; //use first Note to set late 
-	
-		var SoundModule = {
-		    sendMidi: function(note_data) {
-		        if (!hasFirstNoteArrived && note_data.midi_msg) {
-		            hasFirstNoteArrived = true;
-		            timeDiff = note_data.time - performance.now();
-		            console.log('two side timeDiff: ' + timeDiff);
-		        }
-		        console.log('note time from musixiser: ' + note_data.time);
-		        tt = note_data.time - timeDiff + latency;
-	
-		        //第一种synth方案,不传入时间信息，setTimeout控制synth时间
-		        // setTimeout(function() {
-		        //     // Synth.handleMidiMsg(note_data.midi_msg, note_data.timbre);
-		        //     // if (note_data.midi_msg[0]==144)
-		        //     // {letThereBeLight()}
-		        // }, tt - performance.now());
-		        // Synth.handleMidiMsg(note_data.midi_msg, note_data.timbre)    //这行复原啊！！！！！！
-		        //第二种synth方案,传入时间信息，synth自己管理时间
-		        // Synth.handleMidiMsg(note_data.midi_msg, note_data.timbre, tt / 1000.0);
-		    }
+	console.log('SoundModule Activated');
+	module.exports = SoundModule;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	function orderSongTextRule(comment_str) {
+		var split_str;
+		if (comment_str) split_str = comment_str.split('#');
+		if (split_str.length == 3) {
+			return split_str[1];
 		}
+		return false;
+	}
+	var CommentModule = {
+	    init: function(callback) {
+			$('#leaveMessage').keydown(function(e){
+				var content = $(this).val();
+				if (e.keyCode == 13 && content) {
+					$('#tl-msg ul').prepend('<li>'+content+'</li>');
+					callback(content,orderSongTextRule(content));
+					$(this).val('');
+				}
+			});
+	    }
+	}
 	
-		console.log('SoundModule Activated');
-		module.exports = SoundModule;
+	console.log('CommentModule Activated');
+	module.exports = CommentModule;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = { escape: __webpack_require__(8) };module.exports = function (data) {
+	var __t, __p = '', __e = _.escape;
+	__p += '<div id="bg"><img src="' +
+	__e(data.backgroundSprite) +
+	'" id="bgi"></div><div id="top-layer"><div id="tl-basic"><h2 id="musixiser-name">' +
+	__e(data.nickName) +
+	'</h2><h3 id="musixiser-duration">' +
+	__e(data.startTime) +
+	'</h3></div><div id="tl-msg"><ul></ul></div><input id="leaveMessage" placeholder="发表留言:"></div>';
+	return __p
+	};
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module, global) {/**
+	 * lodash 3.1.2 (Custom Build) <https://lodash.com/>
+	 * Build: `lodash modularize exports="npm" -o ./`
+	 * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <https://lodash.com/license>
+	 */
+	
+	/** Used as references for various `Number` constants. */
+	var INFINITY = 1 / 0;
+	
+	/** `Object#toString` result references. */
+	var symbolTag = '[object Symbol]';
+	
+	/** Used to match HTML entities and HTML characters. */
+	var reUnescapedHtml = /[&<>"'`]/g,
+	    reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
+	
+	/** Used to map characters to HTML entities. */
+	var htmlEscapes = {
+	  '&': '&amp;',
+	  '<': '&lt;',
+	  '>': '&gt;',
+	  '"': '&quot;',
+	  "'": '&#39;',
+	  '`': '&#96;'
+	};
+	
+	/** Used to determine if values are of the language type `Object`. */
+	var objectTypes = {
+	  'function': true,
+	  'object': true
+	};
+	
+	/** Detect free variable `exports`. */
+	var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType) ? exports : null;
+	
+	/** Detect free variable `module`. */
+	var freeModule = (objectTypes[typeof module] && module && !module.nodeType) ? module : null;
+	
+	/** Detect free variable `global` from Node.js. */
+	var freeGlobal = checkGlobal(freeExports && freeModule && typeof global == 'object' && global);
+	
+	/** Detect free variable `self`. */
+	var freeSelf = checkGlobal(objectTypes[typeof self] && self);
+	
+	/** Detect free variable `window`. */
+	var freeWindow = checkGlobal(objectTypes[typeof window] && window);
+	
+	/** Detect `this` as the global object. */
+	var thisGlobal = checkGlobal(objectTypes[typeof this] && this);
+	
+	/**
+	 * Used as a reference to the global object.
+	 *
+	 * The `this` value is used if it's the global object to avoid Greasemonkey's
+	 * restricted `window` object, otherwise the `window` object is used.
+	 */
+	var root = freeGlobal || ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) || freeSelf || thisGlobal || Function('return this')();
+	
+	/**
+	 * Checks if `value` is a global object.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {null|Object} Returns `value` if it's a global object, else `null`.
+	 */
+	function checkGlobal(value) {
+	  return (value && value.Object === Object) ? value : null;
+	}
+	
+	/**
+	 * Used by `_.escape` to convert characters to HTML entities.
+	 *
+	 * @private
+	 * @param {string} chr The matched character to escape.
+	 * @returns {string} Returns the escaped character.
+	 */
+	function escapeHtmlChar(chr) {
+	  return htmlEscapes[chr];
+	}
+	
+	/** Used for built-in method references. */
+	var objectProto = Object.prototype;
+	
+	/**
+	 * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+	 * of values.
+	 */
+	var objectToString = objectProto.toString;
+	
+	/** Built-in value references. */
+	var Symbol = root.Symbol;
+	
+	/** Used to convert symbols to primitives and strings. */
+	var symbolProto = Symbol ? Symbol.prototype : undefined,
+	    symbolToString = Symbol ? symbolProto.toString : undefined;
+	
+	/**
+	 * Checks if `value` is object-like. A value is object-like if it's not `null`
+	 * and has a `typeof` result of "object".
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+	 * @example
+	 *
+	 * _.isObjectLike({});
+	 * // => true
+	 *
+	 * _.isObjectLike([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObjectLike(_.noop);
+	 * // => false
+	 *
+	 * _.isObjectLike(null);
+	 * // => false
+	 */
+	function isObjectLike(value) {
+	  return !!value && typeof value == 'object';
+	}
+	
+	/**
+	 * Checks if `value` is classified as a `Symbol` primitive or object.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	 * @example
+	 *
+	 * _.isSymbol(Symbol.iterator);
+	 * // => true
+	 *
+	 * _.isSymbol('abc');
+	 * // => false
+	 */
+	function isSymbol(value) {
+	  return typeof value == 'symbol' ||
+	    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+	}
+	
+	/**
+	 * Converts `value` to a string if it's not one. An empty string is returned
+	 * for `null` and `undefined` values. The sign of `-0` is preserved.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to process.
+	 * @returns {string} Returns the string.
+	 * @example
+	 *
+	 * _.toString(null);
+	 * // => ''
+	 *
+	 * _.toString(-0);
+	 * // => '-0'
+	 *
+	 * _.toString([1, 2, 3]);
+	 * // => '1,2,3'
+	 */
+	function toString(value) {
+	  // Exit early for strings to avoid a performance hit in some environments.
+	  if (typeof value == 'string') {
+	    return value;
+	  }
+	  if (value == null) {
+	    return '';
+	  }
+	  if (isSymbol(value)) {
+	    return Symbol ? symbolToString.call(value) : '';
+	  }
+	  var result = (value + '');
+	  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+	}
+	
+	/**
+	 * Converts the characters "&", "<", ">", '"', "'", and "\`" in `string` to
+	 * their corresponding HTML entities.
+	 *
+	 * **Note:** No other characters are escaped. To escape additional
+	 * characters use a third-party library like [_he_](https://mths.be/he).
+	 *
+	 * Though the ">" character is escaped for symmetry, characters like
+	 * ">" and "/" don't need escaping in HTML and have no special meaning
+	 * unless they're part of a tag or unquoted attribute value.
+	 * See [Mathias Bynens's article](https://mathiasbynens.be/notes/ambiguous-ampersands)
+	 * (under "semi-related fun fact") for more details.
+	 *
+	 * Backticks are escaped because in IE < 9, they can break out of
+	 * attribute values or HTML comments. See [#59](https://html5sec.org/#59),
+	 * [#102](https://html5sec.org/#102), [#108](https://html5sec.org/#108), and
+	 * [#133](https://html5sec.org/#133) of the [HTML5 Security Cheatsheet](https://html5sec.org/)
+	 * for more details.
+	 *
+	 * When working with HTML you should always [quote attribute values](http://wonko.com/post/html-escaping)
+	 * to reduce XSS vectors.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category String
+	 * @param {string} [string=''] The string to escape.
+	 * @returns {string} Returns the escaped string.
+	 * @example
+	 *
+	 * _.escape('fred, barney, & pebbles');
+	 * // => 'fred, barney, &amp; pebbles'
+	 */
+	function escape(string) {
+	  string = toString(string);
+	  return (string && reHasUnescapedHtml.test(string))
+	    ? string.replace(reUnescapedHtml, escapeHtmlChar)
+	    : string;
+	}
+	
+	module.exports = escape;
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)(module), (function() { return this; }())))
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	}
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	//to render the initial stage view
+	module.exports = {
+	  nickName:'小胖子',
+	  avartar:'',
+	  startTime:1357924680,
+	  currentAudienceAmount:10,
+	  backgroundSprite:'http://gw.alicdn.com/tps/TB1hrh4JVXXXXaCXXXXXXXXXXXX-980-756.png'
+	}
 
 /***/ }
 /******/ ]);
