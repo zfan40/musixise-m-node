@@ -128,16 +128,16 @@
 	            // Visual.letThereBeLight(note_data);
 	        });
 	        socket.on('res_MusixiserComment',function(data){
-	            console.log('主播发来一条消息:'+data);
+	            alert('主播发来一条消息:'+data);
 	        });
 	        socket.on('res_MusixiserPickSong',function(data){
-	            console.log('主播将开始演奏'+data);
+	            alert('主播将开始演奏'+data);
 	        });
 	        socket.on('res_AudienceComment', function(data) {
 	            $('#tl-msg ul').prepend('<li>'+data+'</li>');
 	        });
 	        socket.on('res_AudienceOrderSong', function(data) {
-	            console.log('有观众点了歌:'+data);
+	            alert('有观众点了歌:'+data);
 	        });
 	        socket.on('no stage', function() {
 	            $('.stage-banner').html('舞台并不存在,3s后返回');
@@ -230,15 +230,20 @@
 
 /***/ },
 /* 5 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	var Visual = __webpack_require__(4);
+	
 	// jsbridge
 	var MUSIXISE = undefined;
+	alert('nmbdwc');
 	
 	function connectWebViewJavascriptBridge(callback) {
 	    if (window.WebViewJavascriptBridge) {
+	        // alert('jb');
 	        callback(WebViewJavascriptBridge);
 	    } else {
+	        // alert('傻逼玩意');
 	        document.addEventListener('WebViewJavascriptBridgeReady', function() {
 	            callback(WebViewJavascriptBridge);
 	        }, false)
@@ -258,25 +263,32 @@
 	}
 	// timing params
 	var timeDiff = 0; //performer start time vs. audience enter 
-	var latency = 5000; //5000 milliseconds
+	var latency = 6000; //5000 milliseconds
 	var tt = 0; // total time, from the first two params
 	var hasFirstNoteArrived = false; //use first Note to set late 
 	
 	var SoundModule = {
 	    sendMidi: function(note_data) {
+	        var delay = 0;
 	        if (!hasFirstNoteArrived && note_data.midi_msg) {
 	            hasFirstNoteArrived = true;
 	            timeDiff = note_data.time - performance.now(); //rough value
 	        }
 	        tt = note_data.time - timeDiff + latency;
-	        
-	        //method 1: js setTimeout
-	        setTimeout(function() {
-	            callHandler('MusicDeviceMIDIEvent', [+note_data.midi_msg[0], +note_data.midi_msg[1], +note_data.midi_msg[2], 0])
-	        		console.log('bang');
-	        }, tt - performance.now());
-	        //mathod 2: native sample based
-					callHandler('MusicDeviceMIDIEvent', [+note_data.midi_msg[0], +note_data.midi_msg[1], +note_data.midi_msg[2], 44.1*(tt - performance.now())]);
+	        delay = tt - performance.now();
+	        if (delay >= 0) {
+	            //method 1: js setTimeout
+	            setTimeout(function() {
+	                callHandler('MusicDeviceMIDIEvent', [+note_data.midi_msg[0], +note_data.midi_msg[1], +note_data.midi_msg[2], 0]);
+	                Visual.letThereBeLight(note_data);
+	                // console.log('bang');
+	            }, delay);
+	            //mathod 2: native sample based
+	            // callHandler('MusicDeviceMIDIEvent', [+note_data.midi_msg[0], +note_data.midi_msg[1], +note_data.midi_msg[2], 44.1*delay]);
+	        } else {
+	            return;
+	        }
+	
 	    }
 	}
 	
