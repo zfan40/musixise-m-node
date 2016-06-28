@@ -289,6 +289,9 @@
 	        // }
 	
 	        for (var i = 0; i <= length - 1; i++) {
+	            if (i==0||i==length-1){
+	                console.log(performance.now());
+	            }
 	            //method 1: js setTimeout
 	            // (function(i) {
 	            //     setTimeout(function() {
@@ -364,7 +367,7 @@
 					$(this).val('');
 				}
 			});
-			$('#tl-msg').on('scroll', function() {
+			document.querySelector('#tl-msg').addEventListener('touchstart', function() {
 				lockAutoScroll = true;
 				clearTimeout(lockAutoScrollProcess);
 				lockAutoScrollProcess = setTimeout(function() {
