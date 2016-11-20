@@ -4,6 +4,9 @@ const Home = require('./controllers/home');
 const Member = require('./controllers/member');
 const Stage = require('./controllers/stage');
 const Stagelist = require('./controllers/stagelist');
+const MusixiserDetail = require('./controllers/musixiserdetail');
+// const MyFavorite = require('./controllers/myfavorite');
+
 
 const compress = require('koa-compress');
 const logger = require('koa-logger');
@@ -46,7 +49,13 @@ app.use(route.get('/stagelist',Stagelist.Page.show));
 app.use(route.get('/stage/:nick_name', Stage.Page.enter));
 app.use(route.post('/stage/:nick_name', Stage.Page.enter));
 
+//我的收藏
+// app.use(route.get('/me/favorite', MyFavorite.Page.enter));
+// app.use(route.post('/me/favorite', MyFavorite.Page.enter));
 
+//音乐人详情
+app.use(route.get('/musixiser-detail/:nick_name', MusixiserDetail.Page.enter));
+app.use(route.post('/musixiser-detail/:nick_name', MusixiserDetail.Page.enter));
 /**********************************************/
 
 // Serve static files
