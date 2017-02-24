@@ -6,6 +6,7 @@ const Stage = require('./controllers/stage');
 const Stagelist = require('./controllers/stagelist');
 const MusixiserDetail = require('./controllers/musixiserdetail');
 // const MyFavorite = require('./controllers/myfavorite');
+const WeddingInvitation = require('./controllers/wedding');
 
 
 const compress = require('koa-compress');
@@ -57,6 +58,8 @@ app.use(route.post('/stage/:nick_name', Stage.Page.enter));
 app.use(route.get('/musixiser-detail/:nick_name', MusixiserDetail.Page.enter));
 app.use(route.post('/musixiser-detail/:nick_name', MusixiserDetail.Page.enter));
 /**********************************************/
+
+app.use(route.get('/wpp-invitation', WeddingInvitation.Page.home));
 
 // Serve static files
 app.use(serve(path.join(__dirname, 'public')));
