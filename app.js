@@ -5,6 +5,7 @@ const Member = require('./controllers/member');
 const Stage = require('./controllers/stage');
 const Stagelist = require('./controllers/stagelist');
 const MusixiserDetail = require('./controllers/musixiserdetail');
+const WorkUpdate = require('./controllers/workupdate')
 // const MyFavorite = require('./controllers/myfavorite');
 const WeddingInvitation = require('./controllers/wedding');
 
@@ -57,6 +58,10 @@ app.use(route.post('/stage/:nick_name', Stage.Page.enter));
 //音乐人详情
 app.use(route.get('/musixiser-detail/:nick_name', MusixiserDetail.Page.enter));
 app.use(route.post('/musixiser-detail/:nick_name', MusixiserDetail.Page.enter));
+
+//更新作品信息
+app.use(route.get('/work-update/:workid', WorkUpdate.Page.enter));
+app.use(route.post('/work-update/:workid', WorkUpdate.Page.enter));
 /**********************************************/
 
 app.use(route.get('/wpp-invitation', WeddingInvitation.Page.home));
