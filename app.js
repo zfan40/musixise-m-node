@@ -32,7 +32,9 @@ app.use(logger());
 
 /***** Home *****/
 app.use(route.get('/', Home.Page.home));
-
+//the recommend page reference a swiper plugin, where {{index}} cause trouble..
+//should manually change the code to \{\{index\}\}
+app.use(route.get('/home-recommend', Home.Page.recommend));
 /***** Member *****/
 // 注册用户
 app.use(route.get('/member/join', Member.Page.join));

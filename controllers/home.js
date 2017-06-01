@@ -18,10 +18,13 @@ var Page = {
      */
 
     home: function* home(ctx) {
-        this.body = yield render('home/home', { 'messages': messages });
+      this.body = yield render('home/home', { 'messages': messages });
     },
     join: function*() {
 
+    },
+    recommend: function*(){
+      this.body = yield render('home/recommend', { 'messages': messages });  
     },
     login: function*() {
 
