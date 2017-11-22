@@ -7,6 +7,7 @@ const Stagelist = require('./controllers/stagelist');
 const MusixiserDetail = require('./controllers/musixiserdetail');
 const WorkUpdate = require('./controllers/workupdate');
 const Follow = require('./controllers/follow');
+const MusicBoxMaker = require('./controllers/musicboxmaker');
 // const MyFavorite = require('./controllers/myfavorite');
 const WeddingInvitation = require('./controllers/wedding');
 
@@ -69,6 +70,9 @@ app.use(route.post('/work-update/:work_id', WorkUpdate.Page.enter));
 //关注
 app.use(route.get('/follower/:musixiser_id',Follow.Page.enterFollower));
 app.use(route.get('/following/:musixiser_id',Follow.Page.enterFollowing));
+
+//制作八音盒
+app.use(route.get('/music-box-maker',MusicBoxMaker.Page.home));
 /**********************************************/
 
 app.use(route.get('/wpp-invitation', WeddingInvitation.Page.home));
