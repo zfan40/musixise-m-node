@@ -20,8 +20,8 @@ var Page = {
     home: function* home(ctx) {
         this.body = yield render('event/musicboxmaker', { 'messages': messages });
     },
-    join: function*() {
-
+    spa: function*() {
+        this.body = yield render('event/newmusicboxmaker', { 'messages': messages });
     },
     login: function*() {
 

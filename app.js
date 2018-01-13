@@ -73,6 +73,7 @@ app.use(route.get('/following/:musixiser_id',Follow.Page.enterFollowing));
 
 //制作八音盒
 app.use(route.get('/music-box-maker',MusicBoxMaker.Page.home));
+app.use(route.get('/music-box',MusicBoxMaker.Page.spa));
 /**********************************************/
 
 app.use(route.get('/wpp-invitation', WeddingInvitation.Page.home));
